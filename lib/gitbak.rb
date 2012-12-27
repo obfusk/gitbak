@@ -29,6 +29,8 @@ module GitBak
     },
   }                                                             # }}}1
 
+  REMOTE = ->(s, x) { REMOTES[s][x.fetch(:method, :ssh).to_sym] }
+
   class << self
 
     def die (msg)
@@ -36,8 +38,12 @@ module GitBak
       exit 1
     end
 
+    def exists? (path)
+      File.exists?(path) or File.symlink?(path)
+    end
+
     def sys (cmd, *args)
-      p 'sys:', cmd, args
+      p 'sys:', cmd, args                                       # TODO
       # system [cmd, cmd], *args or raise 'OOPS'                # TODO
     end
 
@@ -59,68 +65,78 @@ module GitBak
         http_basic_authentication: auth && [auth[:user], auth[:pass]]
     end
 
-    def repo_name (repo)
-      File.basename(repo).sub(/\.git$/, '')
+    def repo_name (remote)
+      File.basename(remote).sub(/\.git$/, '')
     end
 
-    def mirror (repo, dir)                                      # {{{1
-      name  = repo_name repo
-      r_dir = "#{dir}/#{name}.git"
+    def mirror (remote, dir)                                    # {{{1
+      name      = repo_name remote
+      name_     = name + '.git'
+      repo_dir  = "#{dir}/#{name_}"
 
-      if File.exists? r_dir
-        FileUtils.cd(r_dir) do
+      p 'mkdir:', dir                                           # TODO
+      # FileUtils::mkdir_p dir                                  # TODO
+
+      if exists? repo_dir
+        FileUtils.cd(repo_dir) do
           sys *%w{ git remote update }
         end
       else
         FileUtils.cd(dir) do
-          sys *( %w{ git clone --mirror -n } + [repo, name] )
+          sys *( %w{ git clone --mirror -n } + [remote, name_] )
         end
       end
     end                                                         # }}}1O
 
     # --
 
-    def repos_bb (user, auth)                                   # {{{1
-      api_get(:bitbucket)['repositories'].map do |x|
-        ...
+    def repos_bitbucket (x, auth)                               # {{{1
+      rem = REMOTE[:bitbucket, x]
+
+      api_get(:bitbucket, x[:user], auth)['repositories'] \
+        .filter { |r| r['scm'] == 'git' } .map do |r|
+          { remote: rem[x[:user], r['name']],
+            description: r['description'] }
+        end
+    end                                                         # }}}1
+
+    def repos_github (x, auth)                                  # {{{1
+      rem = REMOTE[:github, x]
+
+      api_get(:github, x[:user], auth).map do |r|
+        { remote: rem[x[:user], r['name']],
+          description: r['description'] }
       end
     end                                                         # }}}1
 
-    def repos_gh (user, auth)
-      # ...
-    end                                                         # }}}1
+    def repos_gist (x, auth)                                    # {{{1
+      rem = REMOTE[:gist, x]
 
-    def gists (user, auth)
-      # ...
+      api_get(:gist, x[:user], auth).map do |r|
+        { remote: rem[r['id']],
+          description: r['description'] }
+      end
     end                                                         # }}}1
 
     # --
 
-    def mirror_bb
-      # ...
-    end
+    def mirror_service (service, x, auth)                       # {{{1
+      auth_ = auth[x[ x[:auth] == true ? :user : :auth ]]
+      repos = send "repos_#{service}", x, auth_
 
-    def mirror_gh
-      # ...
-    end
-
-    def mirror_gist
-      # ...
-    end
+      repos.each do |r|
+        p 'repo:', r                                            # TODO
+        mirror r[:remote]                                       # TODO
+      end
+    end                                                         # }}}1
 
     # --
 
     def main (config)                                           # {{{1
-      config[:bitbucket].each do |x|
-        mirror_bb x, config[:auth][:bitbucket]
-      end
-
-      config[:github].each do |x|
-        mirror_gh x, config[:auth][:github]
-      end
-
-      config[:gist].each do |x|
-        mirror_gist x, config[:auth][:github]
+      %w{ bitbucket github gist }.map(&:to_sym).each do |service|
+        config[service].each do |x|
+          mirror_service service, x, config[:auth][service]
+        end
       end
     end                                                         # }}}1
 

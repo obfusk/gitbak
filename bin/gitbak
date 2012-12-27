@@ -52,7 +52,8 @@ module GitBak                                                   # {{{1
 
   class << self
     def auth (service, user, pass = nil)
-      (CONFIG__[:auth][:service] ||= {})[user] = pass
+      (CONFIG__[:auth][:service] ||= {})[user] = \
+        { user: user, pass: pass }
     end
 
     %w{ bitbucket github gist }.map(&:to_sym).each do |name|
