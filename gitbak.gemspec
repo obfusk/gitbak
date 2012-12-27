@@ -15,11 +15,12 @@ Gem::Specification.new do |s|
   s.date                  = GitBak::DATE
 
   s.authors               = [ 'Felix C. Stegerman' ]
-  s.email                 = [ 'flx@obfusk.net' ]
+  s.email                 = %w{ flx@obfusk.net }
 
   s.license               = 'GPLv2'
 
   s.files                 = Dir[ 'bin/gitbak', 'lib/**.rb' ]
+  s.executables           = %w{ bin/gitbak }
 
   s.add_runtime_dependency  'json'
 
