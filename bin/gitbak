@@ -17,7 +17,7 @@ help  = <<-END.gsub(/^ {2}/, '')                                # {{{1
 
     GitBak.auth       :github, 'user', 'pass'
 
-    GitBak.bitbucket  "\#{dir}/bb", user: 'user', auth: true
+    GitBak.bitbucket  "\#{dir}/bb", 'user', auth: true
     GitBak.github     "\#{dir}/gh", ..., method: :https
     GitBak.gist       ...
     ^D
@@ -57,36 +57,38 @@ module GitBak                                                   # {{{1
     end
 
     %w{ bitbucket github gist }.map(&:to_sym).each do |name|
-      define_method(name) { |cfg| CONFIG__[name] << cfg }
+      define_method(name) do |dir, user, opts = {}|
+        CONFIG__[name] << opts.merge dir: dir, user: user
+      end
     end
   end
 end                                                             # }}}1
 
 # --
 
-unless File.exists? GitBak.CONFIG__[:cfgfile]
-  GitBak.die "Configuration file (#{GitBak.CONFIG__[:cfgfile]}) " \
+unless File.exists? GitBak::CONFIG__[:cfgfile]
+  GitBak.die "Configuration file (#{GitBak::CONFIG__[:cfgfile]}) " \
              "not found."
 end
 
-load GitBak.CONFIG__[:cfgfile]
+load GitBak::CONFIG__[:cfgfile]
 
 # --
 
 %w{ Bitbucket GitHub Gist }.each do |name|                      # {{{1
-  GitBak.CONFIG__[name.downcase.to_sym].each do |x|
+  GitBak::CONFIG__[name.downcase.to_sym].each do |x|
     a = x[:auth] or next
 
     GitBak.die "#{name} configuration invalid" \
       unless [1,2].include? a.length
 
-    a << GitBak.prompt "#{name} password for #{a[0]}: " \
+    a << GitBak.prompt("#{name} password for #{a[0]}: ") \
       if a.length == 1
   end
 end                                                             # }}}1
 
 # --
 
-GitBak.main GitBak.CONFIG__
+GitBak.main GitBak::CONFIG__
 
 # vim: set tw=70 sw=2 sts=2 et fdm=marker :
