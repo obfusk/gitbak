@@ -21,9 +21,6 @@ Gem::Specification.new do |s|
 
   s.files                 = Dir[ 'bin/gitbak', 'lib/**.rb' ]
 
-  s.bindir                = 'bin'
-  s.require_path          = 'lib'
-
   s.add_runtime_dependency  'json'
 
   s.required_ruby_version = '>= 1.9.1'
