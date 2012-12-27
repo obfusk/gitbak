@@ -90,7 +90,7 @@ load options[:cfgfile]
 
 # --
 
-%w{ Bitbucket GitHub Gist }.each do |name|                      # {{{1
+%w{ Bitbucket GitHub }.each do |name|                           # {{{1
   key = name.downcase.to_sym
   GitBak::CONFIG__[:auth].fetch(key, []).each do |k, v|
     v[:pass]  = GitBak.prompt "#{name} password for #{v[:user]}: ",
@@ -98,6 +98,8 @@ load options[:cfgfile]
       unless v[:pass]
   end
 end                                                             # }}}1
+
+GitBak::CONFIG__[:auth][:gist] = GitBak::CONFIG__[:auth][:github]
 
 # --
 
