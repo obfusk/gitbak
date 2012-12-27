@@ -69,7 +69,7 @@ module GitBak                                                   # {{{1
 
   class << self
     def auth (service, user, pass = nil)
-      (CONFIG__[:auth][:service] ||= {})[user] = \
+      (CONFIG__[:auth][service] ||= {})[user] = \
         { user: user, pass: pass }
     end
 
@@ -91,9 +91,11 @@ load options[:cfgfile]
 # --
 
 %w{ Bitbucket GitHub Gist }.each do |name|                      # {{{1
-  GitBak::CONFIG__[:auth].fetch(name.downcase.to_sym, []).each do |x|
-    x[:pass] = GitBak.prompt "#{name} password for #{x[:name]}: " \
-      unless x[:pass]
+  key = name.downcase.to_sym
+  GitBak::CONFIG__[:auth].fetch(key, []).each do |k, v|
+    v[:pass]  = GitBak.prompt "#{name} password for #{v[:user]}: ",
+                  true \
+      unless v[:pass]
   end
 end                                                             # }}}1
 

@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'io/console'
 require 'json'
 require 'open-uri'
@@ -54,7 +55,9 @@ module GitBak
       STDOUT.flush
 
       if hide
-        STDIN.noecho { |i| i.readline }
+        line = STDIN.noecho { |i| i.readline }
+        STDOUT.puts
+        line
       else
         STDIN.readline
       end .chomp
@@ -78,7 +81,7 @@ module GitBak
       name_     = name + '.git'
       repo_dir  = "#{dir}/#{name_}"
 
-      FileUtils::mkdir_p dir
+      FileUtils.mkdir_p dir
 
       if exists? repo_dir
         FileUtils.cd(repo_dir) do
@@ -125,15 +128,17 @@ module GitBak
     # --
 
     def mirror_service (service, x, auth, verbose)              # {{{1
-      puts "\n=== #{service} for #{x[:user]} ==="
+      puts "#{service} for #{x[:user]} ..."
 
       auth_ = auth && auth[x[ x[:auth] == true ? :user : :auth ]]
       repos = send "repos_#{service}", x, auth_
 
       repos.each do |r|
-        puts "  --> #{r[:name]} (#{r[:description]})" \
+        d = r[:description]
+        puts "==> #{service} | #{x[:user]} | #{r[:name]} | #{d} <==" \
           if verbose                                            # TODO
         mirror r[:remote], x[:dir], verbose
+        puts if verbose
       end
 
       repos.length
@@ -153,13 +158,14 @@ module GitBak
       end
 
       if config[:verbose]
-        puts "\n=== Summary ==="
+        puts '', "=== Summary ===", ''
         s.each_pair do |service, info|
           info.each_pair do |user, len|
             printf "  %-15s for %-20s: %10s repositories\n",
               service, user, len
           end
         end
+        puts
       end
     end                                                         # }}}1
 
