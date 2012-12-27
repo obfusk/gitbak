@@ -3,9 +3,13 @@ require File.expand_path('../lib/gitbak/version', __FILE__)
 Gem::Specification.new do |s|
   s.name                  = 'gitbak'
   s.homepage              = 'https://github.com/obfusk/gitbak'
+  s.summary               = 'GitHub/Bitbucket/Gist backup'
 
-  s.summary               = 'Github/Bitbucket backup'
-  s.description           = 'Github/Bitbucket backup'
+  s.description = <<-END.gsub(/^ {4}/, '')
+    GitBak allows you to mirror GitHub/Bitbucket/Gist repositories
+    easily; you only need to specify users (and authentication) in
+    ~/.gitbak and it does the rest.
+  END
 
   s.version               = GitBak::VERSION
   s.date                  = GitBak::DATE
