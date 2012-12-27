@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.license               = 'GPLv2'
 
   s.files                 = Dir[ 'bin/gitbak', 'lib/**.rb' ]
-  s.executables           = %w{ bin/gitbak }
+  s.executables           = %w{ gitbak }
 
   s.add_runtime_dependency  'json'
 
