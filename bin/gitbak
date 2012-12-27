@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+require 'gitbak'
+
+# --
+
+usage = 'gitbak [ --help | <cfgfile> ]'
+
+help  = <<-END.gsub(/^ {2}/, '')                                # {{{1
+  Usage: #{usage}
+
+  Gitbak makes backups of GitHub/Bitbucket/Gist repositories.
+
+  Example configuration:
+    $ cat > ~/.gitbak
+    dir = '/path/to/backup/dir'
+
+    GitBak.auth       :github, 'user', 'pass'
+
+    GitBak.bitbucket  "\#{dir}/bb", user: 'user', auth: true
+    GitBak.github     "\#{dir}/gh", ..., method: :https
+    GitBak.gist       ...
+    ^D
+
+  NB:
+    * auth: pass is optional; gitbak prompts for user w/o pass.
+    * bitbucket/github/gist: auth is optional; auth can be true for
+      same user, or string for user name.
+    * method is optional, :ssh by default.
+    * To backup for multiple users, call bitbucket/github/gist
+      multiple times.
+
+  Tip: you can use e.g. the current date in the path(s).
+END
+                                                                # }}}1
+
+# --
+
+GitBak.die "usage: #{usage}" \
+  unless ARGV.length <= 1
+
+if ARGV == %w{ --help }
+  print help
+  exit 0
+end
+
+# --
+
+module GitBak                                                   # {{{1
+  CONFIG__  = { cfgfile: ARGV[0] || "#{Dir.home}/.gitbak",
+                bitbucket: [], github: [], gist: [], auth: {} }
+
+  class << self
+    def auth (service, user, pass = nil)
+      (CONFIG__[:auth][:service] ||= {})[user] = pass
+    end
+
+    %w{ bitbucket github gist }.map(&:to_sym).each do |name|
+      define_method(name) { |cfg| CONFIG__[name] << cfg }
+    end
+  end
+end                                                             # }}}1
+
+# --
+
+unless File.exists? GitBak.CONFIG__[:cfgfile]
+  GitBak.die "Configuration file (#{GitBak.CONFIG__[:cfgfile]}) " \
+             "not found."
+end
+
+load GitBak.CONFIG__[:cfgfile]
+
+# --
+
+%w{ Bitbucket GitHub Gist }.each do |name|                      # {{{1
+  GitBak.CONFIG__[name.downcase.to_sym].each do |x|
+    a = x[:auth] or next
+
+    GitBak.die "#{name} configuration invalid" \
+      unless [1,2].include? a.length
+
+    a << GitBak.prompt "#{name} password for #{a[0]}: " \
+      if a.length == 1
+  end
+end                                                             # }}}1
+
+# --
+
+GitBak.main GitBak.CONFIG__
+
+# vim: set tw=70 sw=2 sts=2 et fdm=marker :
