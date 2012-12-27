@@ -1,14 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'gitbak'
+require 'optparse'
 
 # --
 
-usage = 'gitbak [ --help | <cfgfile> ]'
+usage = 'gitbak [<option(s)>]'
 
-help  = <<-END.gsub(/^ {2}/, '')                                # {{{1
-  Usage: #{usage}
-
+info  = <<-END.gsub(/^ {2}/, '')                                # {{{1
   Gitbak makes backups of GitHub/Bitbucket/Gist repositories.
 
   Example configuration:
@@ -36,19 +35,37 @@ END
 
 # --
 
-GitBak.die "usage: #{usage}" \
-  unless ARGV.length <= 1
+options = { cfgfile: "#{Dir.home}/.gitbak", verbose: false }
 
-if ARGV == %w{ --help }
-  print help
-  exit 0
-end
+OptionParser.new do |opts|                                      # {{{1
+  opts.banner = usage
+
+  opts.on('-c', '--config-file FILE', 'Configuration file') do |f|
+    options[:cfgfile] = f
+  end
+
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
+    options[:verbose] = v
+  end
+
+  opts.on_tail('-h', '--help', 'Show this message') do
+    puts opts, '', info
+    exit
+  end
+
+  opts.on_tail('--version', 'Show version') do
+    puts "gitbak v#{GitBak::VERSION}"
+    exit
+  end
+end.parse!                                                      # }}}1
+
+GitBak.die "usage: #{usage}" \
+  unless ARGV.length == 0
 
 # --
 
 module GitBak                                                   # {{{1
-  CONFIG__  = { cfgfile: ARGV[0] || "#{Dir.home}/.gitbak",
-                bitbucket: [], github: [], gist: [], auth: {} }
+  CONFIG__  = { bitbucket: [], github: [], gist: [], auth: {} }
 
   class << self
     def auth (service, user, pass = nil)
@@ -58,7 +75,7 @@ module GitBak                                                   # {{{1
 
     %w{ bitbucket github gist }.map(&:to_sym).each do |name|
       define_method(name) do |dir, user, opts = {}|
-        CONFIG__[name] << opts.merge dir: dir, user: user
+        CONFIG__[name] << opts.merge(dir: dir, user: user)
       end
     end
   end
@@ -66,29 +83,22 @@ end                                                             # }}}1
 
 # --
 
-unless File.exists? GitBak::CONFIG__[:cfgfile]
-  GitBak.die "Configuration file (#{GitBak::CONFIG__[:cfgfile]}) " \
-             "not found."
-end
+GitBak.die "Configuration file (#{options[:cfgfile]}) not found." \
+  unless File.exists? options[:cfgfile]
 
-load GitBak::CONFIG__[:cfgfile]
+load options[:cfgfile]
 
 # --
 
 %w{ Bitbucket GitHub Gist }.each do |name|                      # {{{1
-  GitBak::CONFIG__[name.downcase.to_sym].each do |x|
-    a = x[:auth] or next
-
-    GitBak.die "#{name} configuration invalid" \
-      unless [1,2].include? a.length
-
-    a << GitBak.prompt("#{name} password for #{a[0]}: ") \
-      if a.length == 1
+  GitBak::CONFIG__[:auth].fetch(name.downcase.to_sym, []).each do |x|
+    x[:pass] = GitBak.prompt "#{name} password for #{x[:name]}: " \
+      unless x[:pass]
   end
 end                                                             # }}}1
 
 # --
 
-GitBak.main GitBak::CONFIG__
+GitBak.main GitBak::CONFIG__.merge(options)
 
 # vim: set tw=70 sw=2 sts=2 et fdm=marker :

@@ -9,17 +9,17 @@ require 'gitbak/version'
 module GitBak
 
   APIS = {
-    bb:   ->(user) { "api.bitbucket.org/1.0/users/#{user}"  },
-    gh:   ->(user) { "api.github.com/users/#{user}/repos"   },
-    gist: ->(user) { "api.github.com/users/#{user}/gists"   },
+    bitbucket:  ->(user) { "api.bitbucket.org/1.0/users/#{user}"  },
+    github:     ->(user) { "api.github.com/users/#{user}/repos"   },
+    gist:       ->(user) { "api.github.com/users/#{user}/gists"   },
   }
 
   REMOTES = {                                                   # {{{1
-    bb: {
+    bitbucket: {
       ssh:    ->(u,r) { "git@bitbucket.org:#{u}/#{r}.git" },
       https:  ->(u,r) { "https://bitbucket.org/#{u}/#{r}.git" },
     },
-    gh: {
+    github: {
       ssh:    ->(u,r) { "git@github.com:#{u}/#{r}.git" },
       https:  ->(u,r) { "https://github.com/#{u}/#{r}.git" },
     },
@@ -43,7 +43,7 @@ module GitBak
     end
 
     def sys (cmd, *args)
-      p 'sys:', cmd, args                                       # TODO
+      puts "sys: #{([cmd] + args).inspect}"                     # TODO
       # system [cmd, cmd], *args or raise 'OOPS'                # TODO
     end
 
@@ -61,8 +61,10 @@ module GitBak
     # --
 
     def api_get (service, user, auth)
-      open "https://#{APIS[service][user]}",
-        http_basic_authentication: auth && [auth[:user], auth[:pass]]
+      opts = auth ? { http_basic_authentication:
+                      [auth[:user], auth[:pass]] } : {}
+
+      JSON.load open("https://#{APIS[service][user]}", opts)
     end
 
     def repo_name (remote)
@@ -74,8 +76,7 @@ module GitBak
       name_     = name + '.git'
       repo_dir  = "#{dir}/#{name_}"
 
-      p 'mkdir:', dir                                           # TODO
-      # FileUtils::mkdir_p dir                                  # TODO
+      FileUtils::mkdir_p dir
 
       if exists? repo_dir
         FileUtils.cd(repo_dir) do
@@ -94,9 +95,9 @@ module GitBak
       rem = REMOTE[:bitbucket, x]
 
       api_get(:bitbucket, x[:user], auth)['repositories'] \
-        .filter { |r| r['scm'] == 'git' } .map do |r|
+        .select { |r| r['scm'] == 'git' } .map do |r|
           { remote: rem[x[:user], r['name']],
-            description: r['description'] }
+            description: r['description'], name: r['name'] }
         end
     end                                                         # }}}1
 
@@ -105,7 +106,7 @@ module GitBak
 
       api_get(:github, x[:user], auth).map do |r|
         { remote: rem[x[:user], r['name']],
-          description: r['description'] }
+          description: r['description'], name: r['name'] }
       end
     end                                                         # }}}1
 
@@ -114,19 +115,22 @@ module GitBak
 
       api_get(:gist, x[:user], auth).map do |r|
         { remote: rem[r['id']],
-          description: r['description'] }
+          description: r['description'], name: r['id'] }
       end
     end                                                         # }}}1
 
     # --
 
-    def mirror_service (service, x, auth)                       # {{{1
-      auth_ = auth[x[ x[:auth] == true ? :user : :auth ]]
+    def mirror_service (service, x, auth, verbose)              # {{{1
+      puts "mirroring #{service} for #{x[:user]} ..."
+
+      auth_ = auth && auth[x[ x[:auth] == true ? :user : :auth ]]
       repos = send "repos_#{service}", x, auth_
 
       repos.each do |r|
-        p 'repo:', r                                            # TODO
-        mirror r[:remote]                                       # TODO
+        puts "--> repository #{r[:name]} (#{r[:description]}) ..." \
+          if verbose                                            # TODO
+        mirror r[:remote], x[:dir]
       end
     end                                                         # }}}1
 
@@ -135,7 +139,8 @@ module GitBak
     def main (config)                                           # {{{1
       %w{ bitbucket github gist }.map(&:to_sym).each do |service|
         config[service].each do |x|
-          mirror_service service, x, config[:auth][service]
+          mirror_service service, x, config[:auth][service],
+            config[:verbose]
         end
       end
     end                                                         # }}}1
