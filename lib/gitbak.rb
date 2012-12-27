@@ -42,9 +42,11 @@ module GitBak
       File.exists?(path) or File.symlink?(path)
     end
 
-    def sys (cmd, *args)
-      puts "sys: #{([cmd] + args).inspect}"                     # TODO
-      # system [cmd, cmd], *args or raise 'OOPS'                # TODO
+    def sys (verbose, cmd, *args)
+      puts "  $ #{([cmd] + args).join ' '}" \
+        if verbose
+      system [cmd, cmd], *args \
+        or raise 'OOPS'                                         # TODO
     end
 
     def prompt (prompt, hide = false)                           # {{{1
@@ -71,7 +73,7 @@ module GitBak
       File.basename(remote).sub(/\.git$/, '')
     end
 
-    def mirror (remote, dir)                                    # {{{1
+    def mirror (remote, dir, verbose)                           # {{{1
       name      = repo_name remote
       name_     = name + '.git'
       repo_dir  = "#{dir}/#{name_}"
@@ -80,11 +82,12 @@ module GitBak
 
       if exists? repo_dir
         FileUtils.cd(repo_dir) do
-          sys *%w{ git remote update }
+          sys verbose, *%w{ git remote update }
         end
       else
         FileUtils.cd(dir) do
-          sys *( %w{ git clone --mirror -n } + [remote, name_] )
+          sys verbose,
+            *( %w{ git clone --mirror -n } + [remote, name_] )
         end
       end
     end                                                         # }}}1O
@@ -122,25 +125,40 @@ module GitBak
     # --
 
     def mirror_service (service, x, auth, verbose)              # {{{1
-      puts "mirroring #{service} for #{x[:user]} ..."
+      puts "\n=== #{service} for #{x[:user]} ==="
 
       auth_ = auth && auth[x[ x[:auth] == true ? :user : :auth ]]
       repos = send "repos_#{service}", x, auth_
 
       repos.each do |r|
-        puts "--> repository #{r[:name]} (#{r[:description]}) ..." \
+        puts "  --> #{r[:name]} (#{r[:description]})" \
           if verbose                                            # TODO
-        mirror r[:remote], x[:dir]
+        mirror r[:remote], x[:dir], verbose
       end
+
+      repos.length
     end                                                         # }}}1
 
     # --
 
     def main (config)                                           # {{{1
+      s = {}
+
       %w{ bitbucket github gist }.map(&:to_sym).each do |service|
+        s[service] = {}
         config[service].each do |x|
-          mirror_service service, x, config[:auth][service],
-            config[:verbose]
+          s[service][x[:user]] = mirror_service service, x,
+            config[:auth][service], config[:verbose]
+        end
+      end
+
+      if config[:verbose]
+        puts "\n=== Summary ==="
+        s.each_pair do |service, info|
+          info.each_pair do |user, len|
+            printf "  %-15s for %-20s: %10s repositories\n",
+              service, user, len
+          end
         end
       end
     end                                                         # }}}1
