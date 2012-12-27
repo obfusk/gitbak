@@ -70,7 +70,7 @@ module GitBak
     end
 
     def repo_name (remote)
-      File.basename(remote).sub(/\.git$/, '')
+      remote.sub(%r!^.*[/:]!, '').sub(/\.git$/, '')
     end
 
     def mirror (remote, dir, verbose)                           # {{{1
