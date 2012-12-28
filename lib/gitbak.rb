@@ -1,173 +1,109 @@
+require 'gitbak/misc'
+require 'gitbak/services'
 require 'gitbak/version'
 
 require 'fileutils'
-require 'io/console'
-require 'json'
-require 'open-uri'
 
 # --
 
+# gitbak namespace
 module GitBak
 
-  SERVICES = %w{ Bitbucket GitHub Gist }
+  # configuration error
+  class ConfigError < RuntimeError; end
 
-  APIS = {
-    bitbucket:  ->(user) { "api.bitbucket.org/1.0/users/#{user}"  },
-    github:     ->(user) { "api.github.com/users/#{user}/repos"   },
-    gist:       ->(user) { "api.github.com/users/#{user}/gists"   },
-  }
+  # --
 
-  REMOTES = {                                                   # {{{1
-    bitbucket: {
-      ssh:    ->(u, r)  { "git@bitbucket.org:#{u}/#{r}.git" },
-      https:  ->(u, r)  { "https://bitbucket.org/#{u}/#{r}.git" },
-    },
-    github: {
-      ssh:    ->(u, r)  { "git@github.com:#{u}/#{r}.git" },
-      https:  ->(u, r)  { "https://github.com/#{u}/#{r}.git" },
-    },
-    gist: {
-      ssh:    ->(id)    { "git@gist.github.com:#{id}.git" },
-      https:  ->(id)    { "https://gist.github.com/#{id}.git" },
-    },
-  }                                                             # }}}1
+  # extract name from remote; e.g. "git@server:foo/bar.git" and
+  # "https://server/foo/bar.git" become "bar"
+  def self.repo_name (remote)
+    remote.sub(%r!^.*[/:]!, '').sub(/\.git$/, '')
+  end
 
-  REMOTE = ->(s, x) { REMOTES[s][x.fetch(:method, :ssh).to_sym] }
+  # clone (from remote) or update repository (in dir); optionally
+  # verbose
+  def self.mirror_repo (verbose, remote, dir)                   # {{{1
+    name      = repo_name remote
+    name_     = name + '.git'
+    repo_dir  = "#{dir}/#{name_}"
 
-  class << self
+    FileUtils.mkdir_p dir
 
-    def die (msg)
-      STDERR.puts msg
-      exit 1
-    end
-
-    def exists? (path)
-      File.exists?(path) or File.symlink?(path)
-    end
-
-    def sys (verbose, cmd, *args)
-      puts "  $ #{([cmd] + args).join ' '}" if verbose
-      system [cmd, cmd], *args or raise 'OOPS'                  # TODO
-    end
-
-    def prompt (prompt, hide = false)                           # {{{1
-      STDOUT.print prompt
-      STDOUT.flush
-
-      if hide
-        line = STDIN.noecho { |i| i.readline }
-        STDOUT.puts
-        line
-      else
-        STDIN.readline
-      end .chomp
-    end                                                         # }}}1
-
-    # --
-
-    def api_get (service, user, auth)
-      opts = auth ? { http_basic_authentication:
-                      [auth[:user], auth[:pass]] } : {}
-
-      JSON.load open("https://#{APIS[service][user]}", opts)
-    end
-
-    def repo_name (remote)
-      remote.sub(%r!^.*[/:]!, '').sub(/\.git$/, '')
-    end
-
-    def mirror (remote, dir, verbose)                           # {{{1
-      name      = repo_name remote
-      name_     = name + '.git'
-      repo_dir  = "#{dir}/#{name_}"
-
-      FileUtils.mkdir_p dir
-
-      if exists? repo_dir
-        FileUtils.cd(repo_dir) do
-          sys verbose, *%w{ git remote update }
-        end
-      else
-        FileUtils.cd(dir) do
-          sys verbose,
-            *( %w{ git clone --mirror -n } + [remote, name_] )
-        end
+    if Misc.exists? repo_dir
+      FileUtils.cd(repo_dir) do
+        Misc.sys verbose, *%w{ git remote update }
       end
-    end                                                         # }}}1O
-
-    # --
-
-    def repos_bitbucket (x, auth)                               # {{{1
-      rem = REMOTE[:bitbucket, x]
-
-      api_get(:bitbucket, x[:user], auth)['repositories'] \
-        .select { |r| r['scm'] == 'git' } .map do |r|
-          { remote: rem[x[:user], r['name']],
-            description: r['description'], name: r['name'] }
-        end
-    end                                                         # }}}1
-
-    def repos_github (x, auth)                                  # {{{1
-      rem = REMOTE[:github, x]
-
-      api_get(:github, x[:user], auth).map do |r|
-        { remote: rem[x[:user], r['name']],
-          description: r['description'], name: r['name'] }
+    else
+      FileUtils.cd(dir) do
+        Misc.sys verbose,
+          *( %w{ git clone --mirror -n } + [remote, name_] )
       end
-    end                                                         # }}}1
+    end
+  end                                                           # }}}1
 
-    def repos_gist (x, auth)                                    # {{{1
-      rem = REMOTE[:gist, x]
+  # --
 
-      api_get(:gist, x[:user], auth).map do |r|
-        { remote: rem[r['id']],
-          description: r['description'], name: r['id'] }
+  # check auth; ask passwords
+  def self.configure! (config)                                  # {{{1
+    config[:repos].each do |service, cfgs|
+      auth = config[:auth][service]
+      cfgs.each do |cfg|
+        user = cfg[:auth]
+        auth[user] = { user: user, pass: nil } if user && !auth[user]
       end
-    end                                                         # }}}1
+    end
 
-    # --
+    config[:auth].each do |service, auth|
+      auth.each_value do |x|
+        p = "#{service} password for #{x[:user]}: "
+        x[:pass] ||= Misc.prompt p, true                        # TODO
+      end
+    end
 
-    def mirror_service (service, x, auth, verbose)              # {{{1
-      puts "#{service} for #{x[:user]} ..."
+    [config[:auth], config[:repos]]
+  end                                                           # }}}1
 
-      auth_ = x[:auth] && auth[x[ x[:auth] == true ? :user : :auth ]]
-      repos = send "repos_#{service}", x, auth_
+  # fetch repository lists; optionally verbose
+  def self.fetch (verbose, auth, repos)                         # {{{1
+    repos.map do |service, cfgs|
+      cfgs.map do |cfg|
+        puts "listing #{service} for #{cfg[:user]} ..." if verbose
+        rs = Services.repositories service, cfg, auth[cfg[:user]]
+        [service, cfg[:user], cfg[:dir], rs]
+      end
+    end .flatten 1
+  end                                                           # }}}1
 
-      repos.each do |r|
-        d = r[:description]
-        puts "==> #{service} | #{x[:user]} | #{r[:name]} | #{d} <==" \
-          if verbose
-        mirror r[:remote], x[:dir], verbose
+  # mirror repositories; optionally verbose
+  def self.mirror verbose, repos                                # {{{1
+    repos.each do |s, usr, dir, rs|
+      rs.each do |r|
+        name, desc = r[:name], r[:description]
+        puts "==> #{s} | #{usr} | #{name} | #{desc} <==" if verbose
+        mirror_repo verbose, r[:remote], dir
         puts if verbose
       end
+    end
+  end                                                           # }}}1
 
-      repos.length
-    end                                                         # }}}1
+  # print summary
+  def self.summary repos                                        # {{{1
+    puts '', '=== Summary ===', ''
+    repos.each do |service, usr, dir, rs|
+      printf "  %-15s for %-20s: %10s repositories\n",
+        service, usr, rs.length
+    end
+    puts
+  end                                                           # }}}1
 
-    # --
+  # --
 
-    def main (config)                                           # {{{1
-      sum = {}
-
-      SERVICES.map { |s| s.downcase.to_sym } .each do |s|
-        sum[s] = {}
-        config[s].each do |x|
-          sum[s][x[:user]] = mirror_service s, x,
-            config[:auth][s], config[:verbose]
-        end
-      end
-
-      if config[:verbose]
-        puts '', "=== Summary ===", ''
-        sum.each_pair do |s, x|
-          x.each_pair do |u, n|
-            printf "  %-15s for %-20s: %10s repositories\n", s, u, n
-          end
-        end
-        puts
-      end
-    end                                                         # }}}1
-
+  # run!
+  def self.main (verbose, config)
+    auth, repos   = configure! config
+    repositories  = fetch verbose, auth, repos
+    mirror verbose, repositories
+    summary repositories if verbose
   end
 
 end
