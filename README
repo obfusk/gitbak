@@ -36,6 +36,7 @@ Version     : v0.2.0
 
   Some things that may be useful/implemented at some point.
 
+  * find out why YARD messes up my nice README
   * tests
   * docs
   * custom services (should be easy already)
