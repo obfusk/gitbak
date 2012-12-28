@@ -36,6 +36,8 @@ Version     : v0.2.0
 
   Some things that may be useful/implemented at some point.
 
+  * tests
+  * docs
   * custom services (should be easy already)
   * metadata (issues, wikis, ...)
   * teams/organisations
