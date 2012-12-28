@@ -1,13 +1,15 @@
+require 'gitbak/version'
+
 require 'fileutils'
 require 'io/console'
 require 'json'
 require 'open-uri'
 
-require 'gitbak/version'
-
 # --
 
 module GitBak
+
+  SERVICES = %w{ Bitbucket GitHub Gist }
 
   APIS = {
     bitbucket:  ->(user) { "api.bitbucket.org/1.0/users/#{user}"  },
@@ -17,16 +19,16 @@ module GitBak
 
   REMOTES = {                                                   # {{{1
     bitbucket: {
-      ssh:    ->(u,r) { "git@bitbucket.org:#{u}/#{r}.git" },
-      https:  ->(u,r) { "https://bitbucket.org/#{u}/#{r}.git" },
+      ssh:    ->(u, r)  { "git@bitbucket.org:#{u}/#{r}.git" },
+      https:  ->(u, r)  { "https://bitbucket.org/#{u}/#{r}.git" },
     },
     github: {
-      ssh:    ->(u,r) { "git@github.com:#{u}/#{r}.git" },
-      https:  ->(u,r) { "https://github.com/#{u}/#{r}.git" },
+      ssh:    ->(u, r)  { "git@github.com:#{u}/#{r}.git" },
+      https:  ->(u, r)  { "https://github.com/#{u}/#{r}.git" },
     },
     gist: {
-      ssh:    ->(id)  { "git@gist.github.com:#{id}.git" },
-      https:  ->(id)  { "https://gist.github.com/#{id}.git" },
+      ssh:    ->(id)    { "git@gist.github.com:#{id}.git" },
+      https:  ->(id)    { "https://gist.github.com/#{id}.git" },
     },
   }                                                             # }}}1
 
@@ -44,10 +46,8 @@ module GitBak
     end
 
     def sys (verbose, cmd, *args)
-      puts "  $ #{([cmd] + args).join ' '}" \
-        if verbose
-      system [cmd, cmd], *args \
-        or raise 'OOPS'                                         # TODO
+      puts "  $ #{([cmd] + args).join ' '}" if verbose
+      system [cmd, cmd], *args or raise 'OOPS'                  # TODO
     end
 
     def prompt (prompt, hide = false)                           # {{{1
@@ -130,13 +130,13 @@ module GitBak
     def mirror_service (service, x, auth, verbose)              # {{{1
       puts "#{service} for #{x[:user]} ..."
 
-      auth_ = auth && auth[x[ x[:auth] == true ? :user : :auth ]]
+      auth_ = x[:auth] && auth[x[ x[:auth] == true ? :user : :auth ]]
       repos = send "repos_#{service}", x, auth_
 
       repos.each do |r|
         d = r[:description]
         puts "==> #{service} | #{x[:user]} | #{r[:name]} | #{d} <==" \
-          if verbose                                            # TODO
+          if verbose
         mirror r[:remote], x[:dir], verbose
         puts if verbose
       end
@@ -147,22 +147,21 @@ module GitBak
     # --
 
     def main (config)                                           # {{{1
-      s = {}
+      sum = {}
 
-      %w{ bitbucket github gist }.map(&:to_sym).each do |service|
-        s[service] = {}
-        config[service].each do |x|
-          s[service][x[:user]] = mirror_service service, x,
-            config[:auth][service], config[:verbose]
+      SERVICES.map { |s| s.downcase.to_sym } .each do |s|
+        sum[s] = {}
+        config[s].each do |x|
+          sum[s][x[:user]] = mirror_service s, x,
+            config[:auth][s], config[:verbose]
         end
       end
 
       if config[:verbose]
         puts '', "=== Summary ===", ''
-        s.each_pair do |service, info|
-          info.each_pair do |user, len|
-            printf "  %-15s for %-20s: %10s repositories\n",
-              service, user, len
+        sum.each_pair do |s, x|
+          x.each_pair do |u, n|
+            printf "  %-15s for %-20s: %10s repositories\n", s, u, n
           end
         end
         puts
