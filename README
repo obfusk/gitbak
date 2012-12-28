@@ -13,7 +13,7 @@ Version     : v0.2.0
 
   gitbak - bitbucket/github/gist backup
 
-  GitBak allows you to mirror GitHub/Bitbucket/Gist repositories
+  GitBak allows you to mirror Bitbucket/GitHub/Gist repositories
   easily; you only need to specify paths, users, and authentication in
   ~/.gitbak and it does the rest.
                                                                   }}}1
