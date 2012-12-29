@@ -19,10 +19,10 @@ module GitBak
       options = { cfgfile: "#{Dir.home}/.gitbak", verbose: false }
 
       op = OptionParser.new do |opts|                           # {{{2
-        opts.banner = usage
+        opts.banner = USAGE
 
-        opts.on('-c', '--config-file FILE', 'Configuration file') \
-        do |f|
+        opts.on('-c', '--config-file FILE',
+                'Configuration file') do |f|
           options[:cfgfile] = f
         end
 
@@ -32,6 +32,12 @@ module GitBak
 
         opts.on_tail('-h', '--help', 'Show this message') do
           puts opts, '', GitBak::Config::INFO
+          exit
+        end
+
+        opts.on_tail('-e', '--example',
+                     'Show example configuration') do
+          puts GitBak::Config::CONFIG_EX
           exit
         end
 

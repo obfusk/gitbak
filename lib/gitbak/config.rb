@@ -7,10 +7,11 @@ module GitBak
   # configuration
   module Config
 
-    # configuration example, description
-    INFO = <<-END.gsub(/^ {6}/, '')                             # {{{1
-      gitbak - bitbucket/github/gist backup
+    # description
+    INFO = 'gitbak - bitbucket/github/gist backup'
 
+    # configuration example
+    CONFIG_EX = <<-END.gsub(/^ {6}/, '')                        # {{{1
       === Example Configuration ===
 
         $ cat >> ~/.gitbak
