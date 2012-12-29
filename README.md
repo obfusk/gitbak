@@ -9,7 +9,7 @@
 
 <!-- }}}1 -->
 
-### Description
+## Description
 <!-- \{{{1 -->
 
   gitbak - bitbucket/github/gist backup
@@ -20,7 +20,7 @@
 
 <!-- }}}1 -->
 
-### Usage
+## Usage
 <!-- \{{{1 -->
 
     $ gitbak --help                 # read documentation
@@ -29,7 +29,7 @@
 
 <!-- }}}1 -->
 
-### Installing
+## Installing
 <!-- \{{{1 -->
 
     $ gem install gitbak            # rubygems
@@ -38,7 +38,7 @@
 
 <!-- }}}1 -->
 
-### TODO
+## TODO
 <!-- \{{{1 -->
 
   Some things that may be useful/implemented at some point.
@@ -59,14 +59,14 @@
 
 <!-- }}}1 -->
 
-### License
+## License
 <!-- \{{{1 -->
 
   GPLv2 [1].
 
 <!-- }}}1 -->
 
-### References
+## References
 <!-- \{{{1 -->
 
   [1] GNU General Public License, version 2
