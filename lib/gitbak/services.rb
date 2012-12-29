@@ -49,7 +49,7 @@ module GitBak
         (auth ? { AUTH => [auth[:user], auth[:pass]] } : {}))
     end
 
-    # get repositories from service; uses api_get if APIS[service],
+    # get repositories from service; uses api_get if service in APIS,
     # api_get_<service> otherwise
     #   -> [{name:,remote:,description:},...]
     def self.repositories (service, cfg, auth)

@@ -47,6 +47,7 @@ module GitBak
 
     # configuration base class
     class ServiceCfg                                            # {{{1
+      # data
       attr_reader :_data
 
       # init
@@ -84,6 +85,7 @@ module GitBak
 
     # authentication and repository configuration
     class Cfg                                                   # {{{1
+      # data
       attr_reader :auth, :repos
 
       # init
