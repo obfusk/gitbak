@@ -94,10 +94,10 @@ module GitBak
   # --
 
   # run!
-  def self.main (verbose, config)
+  def self.main (verbose, noact, config)
     auth, repos   = configure! config
     repositories  = fetch verbose, auth, repos
-    # mirror verbose, repositories
+    mirror verbose, repositories unless noact
     summary repositories if verbose
   end
 

@@ -16,18 +16,23 @@ module GitBak
     # parse command line options; die on failure
     def self.parse_options (args)                               # {{{1
       args_   = args.dup
-      options = { cfgfile: "#{Dir.home}/.gitbak", verbose: false }
+      options = { cfgfile: "#{Dir.home}/.gitbak", verbose: false,
+                  noact: false }
 
       op = OptionParser.new do |opts|                           # {{{2
         opts.banner = USAGE
 
         opts.on('-c', '--config-file FILE',
-                'Configuration file') do |f|
-          options[:cfgfile] = f
+                'Configuration file') do |x|
+          options[:cfgfile] = x
         end
 
-        opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
-          options[:verbose] = v
+        opts.on('-v', '--[no-]verbose', 'Run verbosely') do |x|
+          options[:verbose] = x
+        end
+
+        opts.on('-n', '--no-act', 'List w/o mirroring') do |x|
+          options[:noact] = x
         end
 
         opts.on_tail('-h', '--help', 'Show this message') do
@@ -71,7 +76,7 @@ module GitBak
       options = parse_options (args or ARGV)
       cfg     = parse_cfgfile options[:cfgfile]
 
-      GitBak.main options[:verbose], cfg.data
+      GitBak.main options[:verbose], options[:noact], cfg.data
     end
 
   end
