@@ -9,11 +9,6 @@ require 'fileutils'
 # gitbak namespace
 module GitBak
 
-  # configuration error
-  class ConfigError < RuntimeError; end
-
-  # --
-
   # extract name from remote; e.g. "git@server:foo/bar.git" and
   # "https://server/foo/bar.git" become "bar"
   def self.repo_name (remote)
@@ -46,7 +41,7 @@ module GitBak
   # check auth; ask passwords
   def self.configure! (config)                                  # {{{1
     config[:repos].each do |service, cfgs|
-      auth = config[:auth][service]
+      auth = config[:auth][service] ||= {}
       cfgs.each do |cfg|
         user = cfg[:auth]
         auth[user] = { user: user, pass: nil } if user && !auth[user]
@@ -102,7 +97,7 @@ module GitBak
   def self.main (verbose, config)
     auth, repos   = configure! config
     repositories  = fetch verbose, auth, repos
-    mirror verbose, repositories
+    # mirror verbose, repositories
     summary repositories if verbose
   end
 
