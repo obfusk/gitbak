@@ -4,20 +4,21 @@ require 'gitbak/eval'
 
 # gitbak namespace
 module GitBak
+
   # configuration
-  module Config
+  module Config                                                 # {{{1
 
     # description
     INFO = 'gitbak - bitbucket/github/gist backup'
 
     # configuration example
-    CONFIG_EX = <<-END.gsub(/^ {6}/, '')                        # {{{1
+    CONFIG_EX = <<-END.gsub(/^ {6}/, '')                        # {{{2
       === Example Configuration ===
 
         $ cat >> ~/.gitbak
         dir = '/path/to/mirrors/dir'
 
-        GitBak::Config do |auth, repos|
+        GitBak.configure do |auth, repos|
           %w{ user1 user2 }.each do |u|
             repos.bitbucket "\#{dir}/\#{u}/bitbucket", u, auth: true
             repos.github    "\#{dir}/\#{u}/github"   , u, auth: true
@@ -42,12 +43,12 @@ module GitBak
         :auth     can be true (same user) or 'username'.
         :method   defaults to :ssh.
     END
-                                                                # }}}1
+                                                                # }}}2
 
     # --
 
     # configuration base class
-    class ServiceCfg                                            # {{{1
+    class ServiceCfg                                            # {{{2
       # data
       attr_reader :_data
 
@@ -64,28 +65,28 @@ module GitBak
           super
         end
       end
-    end                                                         # }}}1
+    end                                                         # }}}2
 
     # authentication configuration
-    class AuthCfg < ServiceCfg                                  # {{{1
+    class AuthCfg < ServiceCfg                                  # {{{2
       # set service auth
       def _service (name, user, pass = nil)
         (@_data[name] ||= {})[user] = { user: user, pass: pass }
       end
-    end                                                         # }}}1
+    end                                                         # }}}2
 
     # repository configuration
-    class ReposCfg < ServiceCfg                                 # {{{1
+    class ReposCfg < ServiceCfg                                 # {{{2
       # set service repo
       def _service (name, dir, user, opts = {})
         c = opts.merge dir: dir, user: user
         c[:auth] = c[:user] if c[:auth] == true
         (@_data[name] ||= []) << c
       end
-    end                                                         # }}}1
+    end                                                         # }}}2
 
     # authentication and repository configuration
-    class Cfg                                                   # {{{1
+    class Cfg                                                   # {{{2
       # data
       attr_reader :auth, :repos
 
@@ -96,7 +97,7 @@ module GitBak
       end
 
       # get data
-      def data                                                  # {{{2
+      def data                                                  # {{{3
         auth  = @auth._data
         repos = @repos._data
 
@@ -105,13 +106,13 @@ module GitBak
         end
 
         { auth: auth, repos: repos }
-      end                                                       # }}}2
-    end                                                         # }}}1
+      end                                                       # }}}3
+    end                                                         # }}}2
 
     # --
 
     # load configuration file
-    def self.load (file)                                        # {{{1
+    def self.load (file)                                        # {{{2
       cfg = eval File.read(file), GitBak::Eval.new.binding, file # ???
 
       warn  "[#{file}] isn't a GitBak::Config::Cfg " \
@@ -119,16 +120,17 @@ module GitBak
         unless Cfg === cfg
 
       cfg
-    end                                                         # }}}1
+    end                                                         # }}}2
 
-    # configure!
-    def self.call (&block)
-      cfg = Cfg.new
-      block[cfg.auth, cfg.repos]
-      cfg.data
-    end
+  end                                                           # }}}1
 
+  # configure!
+  def self.configure (&block)
+    cfg = Config::Cfg.new
+    block[cfg.auth, cfg.repos]
+    cfg.data
   end
+
 end
 
 # vim: set tw=70 sw=2 sts=2 et fdm=marker :
