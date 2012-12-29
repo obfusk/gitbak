@@ -31,7 +31,7 @@ module GitBak
         end
 
         opts.on_tail('-h', '--help', 'Show this message') do
-          puts opts, '', GitBak::Config::INFO
+          puts GitBak::Config::INFO, '', opts
           exit
         end
 
@@ -50,7 +50,7 @@ module GitBak
       begin
         op.parse! args_
       rescue OptionParser::ParseError => e
-        GitBak::Misc.die! "#{e}\nusage: #{USAGE}"
+        GitBak::Misc.die! "#{e}\n\n#{op}"
       end
 
       GitBak::Misc.die! "usage: #{USAGE}" unless args_.length == 0
