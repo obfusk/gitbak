@@ -50,7 +50,7 @@ module GitBak
       begin
         op.parse! args_
       rescue OptionParser::ParseError => e
-        GitBak::Misc.die! "#{reason}\nusage: #{USAGE}"
+        GitBak::Misc.die! "#{e}\nusage: #{USAGE}"
       end
 
       GitBak::Misc.die! "usage: #{USAGE}" unless args_.length == 0
