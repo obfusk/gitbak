@@ -39,31 +39,35 @@ module GitBak
   # --
 
   # check auth; ask passwords
-  def self.configure! (config)                                  # {{{1
-    config[:repos].each do |service, cfgs|
-      auth = config[:auth][service] ||= {}
+  def self.configure (config)                                   # {{{1
+    config_ = config.dup
+
+    config_[:repos].each do |service, cfgs|
+      auth = config_[:auth][service] ||= {}
       cfgs.each do |cfg|
         user = cfg[:auth]
         auth[user] = { user: user, pass: nil } if user && !auth[user]
       end
     end
 
-    config[:auth].each do |service, auth|
+    config_[:auth].each do |service, auth|
+      next if GitBak::Services::USE_AUTH[service]
       auth.each_value do |x|
         p = "#{service} password for #{x[:user]}: "
         x[:pass] ||= Misc.prompt p, true                        # TODO
       end
     end
 
-    [config[:auth], config[:repos]]
+    [config_[:auth], config_[:repos]]
   end                                                           # }}}1
 
   # fetch repository lists; optionally verbose
   def self.fetch (verbose, auth, repos)                         # {{{1
     repos.map do |service, cfgs|
+      au = auth[service]
       cfgs.map do |cfg|
         puts "listing #{service} for #{cfg[:user]} ..." if verbose
-        rs = Services.repositories service, cfg, auth[cfg[:user]]
+        rs = Services.repositories service, cfg, au[cfg[:auth]]
         [service, cfg[:user], cfg[:dir], rs]
       end
     end .flatten 1
@@ -95,7 +99,7 @@ module GitBak
 
   # run!
   def self.main (verbose, noact, config)
-    auth, repos   = configure! config
+    auth, repos   = configure config
     repositories  = fetch verbose, auth, repos
     mirror verbose, repositories unless noact
     summary repositories if verbose

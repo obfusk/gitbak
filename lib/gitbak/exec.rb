@@ -32,7 +32,7 @@ module GitBak
         end
 
         opts.on('-n', '--no-act', 'List w/o mirroring') do |x|
-          options[:noact] = x
+          options[:noact] = !x
         end
 
         opts.on_tail('-h', '--help', 'Show this message') do

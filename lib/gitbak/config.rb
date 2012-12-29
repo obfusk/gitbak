@@ -1,4 +1,5 @@
 require 'gitbak/eval'
+require 'gitbak/services'
 
 # --
 
@@ -129,7 +130,7 @@ module GitBak
 
   end                                                           # }}}1
 
-  # configure!
+  # configure
   def self.configure (&block)
     cfg = Config::Cfg.new
     block[cfg.auth, cfg.repos]
