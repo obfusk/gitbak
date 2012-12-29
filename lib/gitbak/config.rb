@@ -1,4 +1,5 @@
 require 'gitbak/eval'
+require 'gitbak/misc'
 require 'gitbak/services'
 
 # --
@@ -10,7 +11,7 @@ module GitBak
   module Config                                                 # {{{1
 
     # configuration error
-    class ConfigError < RuntimeError; end
+    class ConfigError < GitBak::Error; end
 
     # --
 

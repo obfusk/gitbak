@@ -66,7 +66,7 @@ module GitBak
     repos.map do |service, cfgs|
       au = auth[Services::USE_AUTH.fetch service, service]
       cfgs.map do |cfg|
-        puts "listing #{service} for #{cfg[:user]} ..." if verbose
+        puts "listing #{service}/#{cfg[:user]} ..." if verbose
         rs = Services.repositories service, cfg, au[cfg[:auth]]
         [service, cfg[:user], cfg[:dir], rs]
       end

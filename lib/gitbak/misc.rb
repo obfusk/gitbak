@@ -4,11 +4,17 @@ require 'io/console'
 
 # gitbak namespace
 module GitBak
+
+  # base error class
+  class Error < RuntimeError; end
+
   # miscellaneous
   module Misc
 
     # command execution failure
-    class SysError < RuntimeError; end
+    class SysError < GitBak::Error; end
+
+    # --
 
     # deep copy using Marshal
     def self.deepdup (obj)

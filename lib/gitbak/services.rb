@@ -1,3 +1,5 @@
+require 'gitbak/misc'
+
 require 'json'
 require 'open-uri'
 
@@ -7,6 +9,11 @@ require 'open-uri'
 module GitBak
   # git services
   module Services
+
+    # authentication error
+    class AuthError < GitBak::Error; end
+
+    # --
 
     # avaliable services
     SERVICES = %w{ bitbucket github gist }.map(&:to_sym)
@@ -44,10 +51,23 @@ module GitBak
     # --
 
     # get data from API
-    def self.api_get (service, user, auth)
-      JSON.load open("https://#{APIS[service][user]}",
-        (auth ? { AUTH => [auth[:user], auth[:pass]] } : {}))
-    end
+    def self.api_get (service, user, auth)                      # {{{1
+      url   = "https://#{APIS[service][user]}"
+      opts  = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}
+
+      begin
+        open url, opts
+      rescue OpenURI::HTTPError => e
+        if e.io.status[0] == 401
+          raise AuthError,  "401 unauthorized for #{auth[:user]} " \
+                            "on #{service}/#{user}"
+        else
+          raise
+        end
+      end
+
+      data
+    end                                                         # }}}1
 
     # get repositories from service; uses api_get if service in APIS,
     # api_get_<service> otherwise
@@ -64,7 +84,8 @@ module GitBak
 
     # turn bitbucket API data into a list of repositories
     def self.bitbucket (cfg, data, rem)
-      repos = data['repositories'].select { |r| r['scm'] == 'git' }
+      data_ = JSON.load data
+      repos = data_['repositories'].select { |r| r['scm'] == 'git' }
       repos.map do |r|
         { name: r['name'], remote: rem[cfg[:user], r['name']],
           description: r['description'] }
@@ -73,7 +94,7 @@ module GitBak
 
     # turn github API data into a list of repositories
     def self.github (cfg, data, rem)
-      data.map do |r|
+      JSON.load(data).map do |r|
         { name: r['name'], remote: rem[cfg[:user], r['name']],
           description: r['description'] }
       end
@@ -81,7 +102,7 @@ module GitBak
 
     # turn gist API data into a list of repositories
     def self.gist (cfg, data, rem)
-      data.map do |r|
+      JSON.load(data).map do |r|
         { name: r['id'], remote: rem[r['id']],
           description: r['description'] }
       end
