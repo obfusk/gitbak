@@ -56,11 +56,11 @@ module GitBak
       opts  = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}
 
       begin
-        open url, opts
+        data = open url, opts
       rescue OpenURI::HTTPError => e
-        if e.io.status[0] == 401
-          raise AuthError,  "401 unauthorized for #{auth[:user]} " \
-                            "on #{service}/#{user}"
+        if e.io.status[0] == '401'
+          raise AuthError,
+            "401 for #{auth[:user]} on #{service}/#{user}"
         else
           raise
         end

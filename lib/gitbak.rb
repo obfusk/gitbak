@@ -67,7 +67,13 @@ module GitBak
       au = auth[Services::USE_AUTH.fetch service, service]
       cfgs.map do |cfg|
         puts "listing #{service}/#{cfg[:user]} ..." if verbose
-        rs = Services.repositories service, cfg, au[cfg[:auth]]
+
+        begin
+          rs = Services.repositories service, cfg, au[cfg[:auth]]
+        rescue Services::AuthError => e
+          Misc.die! "authentication failure: #{e}"
+        end
+
         [service, cfg[:user], cfg[:dir], rs]
       end
     end .flatten 1
