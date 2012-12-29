@@ -71,7 +71,7 @@ module GitBak
       options = parse_options (args or ARGV)
       cfg     = parse_cfgfile options[:cfgfile]
 
-      GitBak.main options[:verbose], cfg
+      GitBak.main options[:verbose], cfg.data
     end
 
   end

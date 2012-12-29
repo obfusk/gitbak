@@ -8,6 +8,11 @@ module GitBak
   # configuration
   module Config                                                 # {{{1
 
+    # configuration error
+    class ConfigError < RuntimeError; end
+
+    # --
+
     # description
     INFO = 'gitbak - bitbucket/github/gist backup'
 
@@ -115,8 +120,8 @@ module GitBak
     def self.load (file)                                        # {{{2
       cfg = eval File.read(file), GitBak::Eval.new.binding, file # ???
 
-      warn  "[#{file}] isn't a GitBak::Config::Cfg " \
-            "(#{cfg.class} instead)." \
+      raise ConfigError,  "[#{file}] isn't a GitBak::Config::Cfg " \
+                          "(#{cfg.class} instead)." \
         unless Cfg === cfg
 
       cfg
@@ -128,7 +133,7 @@ module GitBak
   def self.configure (&block)
     cfg = Config::Cfg.new
     block[cfg.auth, cfg.repos]
-    cfg.data
+    cfg
   end
 
 end
