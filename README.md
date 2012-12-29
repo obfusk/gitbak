@@ -1,4 +1,4 @@
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
     File        : README
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
@@ -10,7 +10,7 @@
 <!-- }}}1 -->
 
 ### Description
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
   gitbak - bitbucket/github/gist backup
 
@@ -21,7 +21,7 @@
 <!-- }}}1 -->
 
 ### Usage
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
     $ gitbak --help                 # read documentation
     $ vim ~/.gitbak                 # configure
@@ -30,7 +30,7 @@
 <!-- }}}1 -->
 
 ### Installing
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
     $ gem install gitbak            # rubygems
 
@@ -39,7 +39,7 @@
 <!-- }}}1 -->
 
 ### TODO
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
   Some things that may be useful/implemented at some point.
 
@@ -60,14 +60,14 @@
 <!-- }}}1 -->
 
 ### License
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
   GPLv2 [1].
 
 <!-- }}}1 -->
 
 ### References
-<!-- {{{1 -->
+<!-- \{{{1 -->
 
   [1] GNU General Public License, version 2
   --- http://www.opensource.org/licenses/GPL-2.0
