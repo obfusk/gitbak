@@ -107,10 +107,6 @@ module GitBak
         auth  = @auth._data
         repos = @repos._data
 
-        GitBak::Services::USE_AUTH.each do |to, from|
-          (auth[to] ||= {}).merge auth[from] if auth[from]
-        end
-
         { auth: auth, repos: repos }
       end                                                       # }}}3
     end                                                         # }}}2

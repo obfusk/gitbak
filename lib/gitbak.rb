@@ -39,8 +39,8 @@ module GitBak
   # --
 
   # check auth; ask passwords
-  def self.configure (config)                                   # {{{1
-    config_ = config.dup
+  def self.process_config (config)                              # {{{1
+    config_ = Misc.deepdup config
 
     config_[:repos].each do |service, cfgs|
       auth = config_[:auth][service] ||= {}
@@ -64,7 +64,7 @@ module GitBak
   # fetch repository lists; optionally verbose
   def self.fetch (verbose, auth, repos)                         # {{{1
     repos.map do |service, cfgs|
-      au = auth[service]
+      au = auth[Services::USE_AUTH.fetch service, service]
       cfgs.map do |cfg|
         puts "listing #{service} for #{cfg[:user]} ..." if verbose
         rs = Services.repositories service, cfg, au[cfg[:auth]]
@@ -99,7 +99,7 @@ module GitBak
 
   # run!
   def self.main (verbose, noact, config)
-    auth, repos   = configure config
+    auth, repos   = process_config config
     repositories  = fetch verbose, auth, repos
     mirror verbose, repositories unless noact
     summary repositories if verbose

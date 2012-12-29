@@ -10,6 +10,11 @@ module GitBak
     # command execution failure
     class SysError < RuntimeError; end
 
+    # deep copy using Marshal
+    def self.deepdup (obj)
+      Marshal.load(Marshal.dump obj)
+    end
+
     # print msg to stderr and exit
     def self.die! (msg)
       STDERR.puts msg
