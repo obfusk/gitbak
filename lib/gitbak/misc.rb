@@ -1,3 +1,14 @@
+# --                                                            ; {{{1
+#
+# File        : gitbak/misc.rb
+# Maintainer  : Felix C. Stegerman <flx@obfusk.net>
+# Date        : 2013-01-03
+#
+# Copyright   : Copyright (C) 2013  Felix C. Stegerman
+# Licence     : GPLv2
+#
+# --                                                            ; }}}1
+
 require 'io/console'
 
 # --
