@@ -25,8 +25,9 @@ Gem::Specification.new do |s|
 
   s.license     = 'GPLv2'
 
-  s.files       = Dir[*%w{ README.md bin/gitbak lib/**/*.rb }]
   s.executables = %w{ gitbak }
+  s.files       = %w{ .yardopts README.md bin/gitbak gitbak.gemspec }\
+                + Dir['lib/**/*.rb']
 
   s.add_runtime_dependency 'json'
 
