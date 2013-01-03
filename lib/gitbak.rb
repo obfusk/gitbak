@@ -38,12 +38,12 @@ module GitBak
     FileUtils.mkdir_p dir
 
     if Misc.exists? repo_dir
-      puts "$ cd #{repo_dir}" if verbose
+      puts "$ cd #{repo_dir}" if verbose or noact
       FileUtils.cd(repo_dir) do
         sys[ %w{ git remote update } ]
       end
     else
-      puts "$ cd #{dir}" if verbose
+      puts "$ cd #{dir}" if verbose or noact
       FileUtils.cd(dir) do
         sys[ %w{ git clone --mirror -n } + [remote, name_] ]
       end

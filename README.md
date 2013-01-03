@@ -5,7 +5,7 @@
     Date        : 2013-01-03
 
     Copyright   : Copyright (C) 2013  Felix C. Stegerman
-    Version     : v0.3.0-dev
+    Version     : v0.4.0.dev
 
 <!-- }}}1 -->
 
@@ -29,16 +29,19 @@
 ## Usage
 <!-- \{{{1 -->
 
-    $ gitbak --help                 # show options
-    $ vim ~/.gitbak                 # configure
-    $ gitbak -v                     # mirror
+    $ gitbak --help                   # show options
+    $ vim ~/.gitbak                   # configure
+    $ gitbak -v                       # mirror
+    $ time gitbak -v 2>&1 | tee log   # w/ logfile
+
+  You may want to run gitbak as a cron job.                       TODO
 
 <!-- }}}1 -->
 
 ## Installing
 <!-- \{{{1 -->
 
-    $ gem install gitbak            # rubygems
+    $ gem install gitbak              # rubygems
 
   Get it at https://github.com/obfusk/gitbak.  Depends: git, ruby.
 
