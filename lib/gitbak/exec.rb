@@ -18,11 +18,17 @@ require 'optparse'
 
 # gitbak namespace
 module GitBak
+
   # command-line executable
   module Executable
 
+    # description
+    INFO = 'gitbak - bitbucket/github/gist backup'
+
     # command-line usage
     USAGE = 'gitbak [<option(s)>]'
+
+    # --
 
     # parse command line options; die on failure
     def self.parse_options (args)                               # {{{1
@@ -47,13 +53,7 @@ module GitBak
         end
 
         opts.on_tail('-h', '--help', 'Show this message') do
-          puts GitBak::Config::INFO, '', opts
-          exit
-        end
-
-        opts.on_tail('-e', '--example',
-                     'Show example configuration') do
-          puts GitBak::Config::CONFIG_EX
+          puts INFO, '', opts
           exit
         end
 

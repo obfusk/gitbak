@@ -14,16 +14,22 @@
 
   gitbak - bitbucket/github/gist backup
 
-  GitBak allows you to mirror Bitbucket/GitHub/Gist repositories
-  easily; you only need to specify paths, users, and authentication in
-  ~/.gitbak and it does the rest.
+  GitBak mirrors Bitbucket/GitHub/Gist repositories; paths, users, and
+  authentication are specified in ~/.gitbak.
+
+  When run, gitbak:
+
+  * asks for unspecified passwords;
+  * lists repositories using APIs - authenticating if necessary;
+  * clones/updates repositories;
+  * shows a summary
 
 <!-- }}}1 -->
 
 ## Usage
 <!-- \{{{1 -->
 
-    $ gitbak --help                 # read documentation
+    $ gitbak --help                 # show options
     $ vim ~/.gitbak                 # configure
     $ gitbak -v                     # mirror
 
@@ -35,6 +41,38 @@
     $ gem install gitbak            # rubygems
 
   Get it at https://github.com/obfusk/gitbak.  Depends: git, ruby.
+
+<!-- }}}1 -->
+
+## Configuration
+<!-- \{{{1 -->
+
+### Example
+
+    # ~/.gitbak
+
+    dir = "#{ Dir.home }/__mirror__/#{ Time.new.strftime '%Y%m%d' }"
+
+    GitBak.configure do |auth, services|
+      %w{ bob alice }.each do |u|
+        services.bitbucket  "#{dir}/#{u}/bitbucket", u, auth: true
+        services.github     "#{dir}/#{u}/github"   , u, auth: true
+        services.gist       "#{dir}/#{u}/gist"     , u, auth: true
+      end
+    end
+
+### Methods
+
+    auth.<service>        user[, password]
+    services.<service>    dir, user[, options]
+
+  The (default) services are: bitbucket, github, gist.  GitBak will
+  prompt for unspecified passwords.
+
+#### Repository Options
+
+    :auth     can be true (same user) or 'username'.
+    :method   defaults to :ssh.
 
 <!-- }}}1 -->
 

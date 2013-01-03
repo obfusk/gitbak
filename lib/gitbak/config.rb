@@ -26,45 +26,6 @@ module GitBak
 
     # --
 
-    # description
-    INFO = 'gitbak - bitbucket/github/gist backup'
-
-    # configuration example
-    CONFIG_EX = <<-END.gsub(/^ {6}/, '')                        # {{{2
-      === Example Configuration ===
-
-        $ cat >> ~/.gitbak
-        dir = '/path/to/mirrors/dir'
-
-        GitBak.configure do |auth, repos|
-          %w{ user1 user2 }.each do |u|
-            repos.bitbucket "\#{dir}/\#{u}/bitbucket", u, auth: true
-            repos.github    "\#{dir}/\#{u}/github"   , u, auth: true
-            repos.gist      "\#{dir}/\#{u}/gist"     , u, auth: true
-          end
-        end
-        ^D
-
-
-      === Configuration Methods ===
-
-        auth.<service>    user[, password]
-        repos.<service>   dir, user[, options]
-
-
-      The (default) services are: bitbucket, github, gist.
-      If a password is not specified, gitbak will prompt for it.
-
-
-      === Optional Repository Options ===
-
-        :auth     can be true (same user) or 'username'.
-        :method   defaults to :ssh.
-    END
-                                                                # }}}2
-
-    # --
-
     # configuration base class
     class ServiceCfg                                            # {{{2
       # data

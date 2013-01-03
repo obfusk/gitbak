@@ -6,9 +6,15 @@ Gem::Specification.new do |s|
   s.summary     = 'bitbucket/github/gist backup'
 
   s.description = <<-END.gsub(/^ {4}/, '')
-    GitBak allows you to mirror Bitbucket/GitHub/Gist repositories
-    easily; you only need to specify paths, users, and authentication
-    in ~/.gitbak and it does the rest.
+    GitBak mirrors Bitbucket/GitHub/Gist repositories; paths, users,
+    and authentication are specified in ~/.gitbak.
+
+    When run, gitbak:
+
+    * asks for unspecified passwords;
+    * lists repositories using APIs - authenticating if necessary;
+    * clones/updates repositories;
+    * shows a summary
   END
 
   s.version     = GitBak::VERSION

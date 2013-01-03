@@ -18,7 +18,8 @@ require 'open-uri'
 
 # gitbak namespace
 module GitBak
-  # git services
+
+  # git hosting services
   module Services
 
     # authentication error
@@ -82,7 +83,8 @@ module GitBak
 
     # get repositories from service; uses api_get if service in APIS,
     # api_get_<service> otherwise
-    #   -> [{name:,remote:,description:},...]
+    #
+    # @return [<Hash>] [!{name:, remote:, description:},...]
     def self.repositories (service, cfg, auth)
       rem   = REMOTES[service][cfg.fetch(:method, :ssh).to_sym]
       args  = [service, cfg[:user], auth]
