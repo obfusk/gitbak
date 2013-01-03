@@ -49,17 +49,19 @@
 
 ### Example
 
-    # ~/.gitbak
+```ruby
+# ~/.gitbak
 
-    dir = "#{ Dir.home }/__mirror__/#{ Time.new.strftime '%Y%m%d' }"
+dir = "#{ Dir.home }/__mirror__/#{ Time.new.strftime '%Y%m%d' }"
 
-    GitBak.configure do |auth, services|
-      %w{ bob alice }.each do |u|
-        services.bitbucket  "#{dir}/#{u}/bitbucket", u, auth: true
-        services.github     "#{dir}/#{u}/github"   , u, auth: true
-        services.gist       "#{dir}/#{u}/gist"     , u, auth: true
-      end
-    end
+GitBak.configure do |auth, services|
+  %w{ bob alice }.each do |u|
+    services.bitbucket  "#{dir}/#{u}/bitbucket", u, auth: true
+    services.github     "#{dir}/#{u}/github"   , u, auth: true
+    services.gist       "#{dir}/#{u}/gist"     , u, auth: true
+  end
+end
+```
 
 ### Methods
 
@@ -85,12 +87,16 @@
   * tests?
   * better error handling?
 
+<!-- -->
+
   * custom services (should be easy to add already)
   * metadata (issues, wikis, ...)
   * teams/organisations
   * starred repos/gists
   * filtering
   * oauth?
+
+<!-- -->
 
   * specify ssh key(s)?
   * https clone auth?
