@@ -63,6 +63,7 @@ module GitBak
     # --
 
     # get data from API
+    # @raise AuthError on 401
     def self.api_get (service, user, auth)                      # {{{1
       url   = "https://#{APIS[service][user]}"
       opts  = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}

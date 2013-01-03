@@ -58,12 +58,27 @@ module GitBak
       line and line.chomp
     end                                                         # }}}1
 
-    # execute command; raises SysError on failure; optionally verbose
-    def self.sys (verbose, cmd, *args)
-      puts "$ #{ ([cmd] + args).join ' ' }" if verbose
+    # execute command
+    # @raise SysError on failure
+    def self.sys_ (cmd, *args)
       system [cmd, cmd], *args or raise SysError,
         "failed to run command #{ ([cmd] + args) } (#$?)"
     end
+
+    # execute command (unless noact); optionally verbose
+    # @see sys_
+    def self.sys (cmd, *args)                                   # {{{1
+      opts = Hash === args.last ? args.pop : {}
+
+      puts "$ #{ ([cmd] + args).join ' ' }" \
+        if opts[:verbose] or opts[:noact]
+
+      if opts[:noact]
+        puts '(not actually doing anything)'
+      else
+        sys_ cmd, *args
+      end
+    end                                                         # }}}1
 
   end
 end

@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
     * asks for unspecified passwords;
     * lists repositories using APIs - authenticating if necessary;
     * clones/updates repositories;
-    * shows a summary
+    * shows a summary (if verbose)
   END
 
   s.version     = GitBak::VERSION

@@ -87,6 +87,7 @@ module GitBak
     # --
 
     # load configuration file
+    # @raise ConfigError unless file returns Cfg
     def self.load (file)                                        # {{{2
       cfg = eval File.read(file), GitBak::Eval.new.binding, file # ???
 

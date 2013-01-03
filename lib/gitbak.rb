@@ -28,23 +28,24 @@ module GitBak
 
   # clone (from remote) or update repository (in dir); optionally
   # verbose
-  def self.mirror_repo (verbose, remote, dir)                   # {{{1
+  def self.mirror_repo (verbose, noact, remote, dir)            # {{{1
     name      = repo_name remote
     name_     = name + '.git'
     repo_dir  = "#{dir}/#{name_}"
+
+    sys = ->(args) { Misc.sys *args, verbose: verbose, noact: noact }
 
     FileUtils.mkdir_p dir
 
     if Misc.exists? repo_dir
       puts "$ cd #{repo_dir}" if verbose
       FileUtils.cd(repo_dir) do
-        Misc.sys verbose, *%w{ git remote update }
+        sys[ %w{ git remote update } ]
       end
     else
       puts "$ cd #{dir}" if verbose
       FileUtils.cd(dir) do
-        Misc.sys verbose,
-          *( %w{ git clone --mirror -n } + [remote, name_] )
+        sys[ %w{ git clone --mirror -n } + [remote, name_] ]
       end
     end
   end                                                           # }}}1
@@ -93,19 +94,19 @@ module GitBak
   end                                                           # }}}1
 
   # mirror repositories; optionally verbose
-  def self.mirror verbose, repos                                # {{{1
+  def self.mirror (verbose, noact, repos)                       # {{{1
     repos.each do |s, usr, dir, rs|
       rs.each do |r|
         name, desc = r[:name], r[:description]
         puts "==> #{s} | #{usr} | #{name} | #{desc} <==" if verbose
-        mirror_repo verbose, r[:remote], dir
+        mirror_repo verbose, noact, r[:remote], dir
         puts if verbose
       end
     end
   end                                                           # }}}1
 
   # print summary
-  def self.summary repos                                        # {{{1
+  def self.summary (repos)                                      # {{{1
     puts '', '=== Summary ===', ''
     repos.each do |service, usr, dir, rs|
       printf "  %-15s for %-20s: %10s repositories\n",
@@ -120,7 +121,7 @@ module GitBak
   def self.main (verbose, noact, config)
     auth, repos   = process_config config
     repositories  = fetch verbose, auth, repos
-    mirror verbose, repositories unless noact
+    mirror verbose, noact, repositories
     summary repositories if verbose
   end
 
