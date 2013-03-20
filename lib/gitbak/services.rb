@@ -2,7 +2,7 @@
 #
 # File        : gitbak/services.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2013-01-03
+# Date        : 2013-03-20
 #
 # Copyright   : Copyright (C) 2013  Felix C. Stegerman
 # Licence     : GPLv2
@@ -40,6 +40,19 @@ module GitBak
       gist:       ->(user) { "api.github.com/users/#{user}/gists"   },
     }
 
+    # github pagination
+    GH_PAGES = ->(data; l, n, r) {
+      (l = data.meta['link']) &&
+      (n = l.split(',').grep(/rel="next"/).first) &&
+      (r = l.match(%r{<(https://[^>]*)>})) && r[1]
+    }
+
+    # pagination
+    PAGES = { github: GH_PAGES, gist: GH_PAGES }
+
+    # JSON pages concat
+    JCAT = ->(pages) { pages.map { |x| JSON.load x } .flatten 1 }
+
     # remote urls
     REMOTES =                                                   # {{{1
     {
@@ -64,9 +77,8 @@ module GitBak
 
     # get data from API
     # @raise AuthError on 401
-    def self.api_get (service, user, auth)                      # {{{1
-      url   = "https://#{APIS[service][user]}"
-      opts  = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}
+    def self.api_get_ (url, auth)                               # {{{1
+      opts = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}
 
       begin
         data = open url, opts
@@ -81,6 +93,23 @@ module GitBak
 
       data
     end                                                         # }}}1
+
+    # paginate
+    def self.paginate (pag, url, &b)
+      pages = []
+      while url; pages << data = b[url]; url = pag[data]; end
+      pages
+    end
+
+    # get data from API (w/ pagination if necessary); see api_get_
+    # @return [String]
+    # @return [<String>] if paginated
+    def self.api_get (service, user, auth)
+      url = "https://#{APIS[service][user]}"
+      pag = PAGES[service]
+      pag ? paginate(pag, url) { |u| api_get_ u, auth }
+          : api_get_(url, auth)
+    end
 
     # get repositories from service; uses api_get if service in APIS,
     # api_get_<service> otherwise
@@ -108,7 +137,7 @@ module GitBak
 
     # turn github API data into a list of repositories
     def self.github (cfg, data, rem)
-      JSON.load(data).map do |r|
+      JCAT[data].map do |r|
         { name: r['name'], remote: rem[cfg[:user], r['name']],
           description: r['description'] }
       end
@@ -116,7 +145,7 @@ module GitBak
 
     # turn gist API data into a list of repositories
     def self.gist (cfg, data, rem)
-      JSON.load(data).map do |r|
+      JCAT[data].map do |r|
         { name: r['id'], remote: rem[r['id']],
           description: r['description'] }
       end
