@@ -2,7 +2,7 @@
 #
 # File        : gitbak/services.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2013-03-20
+# Date        : 2013-04-21
 #
 # Copyright   : Copyright (C) 2013  Felix C. Stegerman
 # Licence     : GPLv2
@@ -77,7 +77,7 @@ module GitBak
 
     # get data from API
     # @raise AuthError on 401
-    def self.api_get_ (url, auth)                               # {{{1
+    def self.api_get_ (url, auth, service, user)                # {{{1
       opts = auth ? { AUTH => [auth[:user], auth[:pass]] } : {}
 
       begin
@@ -105,10 +105,10 @@ module GitBak
     # @return [String]
     # @return [<String>] if paginated
     def self.api_get (service, user, auth)
+      get = ->(u) { api_get_ u, auth, service, user }
       url = "https://#{APIS[service][user]}"
       pag = PAGES[service]
-      pag ? paginate(pag, url) { |u| api_get_ u, auth }
-          : api_get_(url, auth)
+      pag ? paginate(pag, url) { |u| get[u] } : get[url]
     end
 
     # get repositories from service; uses api_get if service in APIS,
