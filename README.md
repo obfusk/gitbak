@@ -9,12 +9,14 @@
 
 []: }}}1
 
+[![Gem Version](https://badge.fury.io/rb/gitbak.png)](http://badge.fury.io/rb/gitbak)
+
 ## Description
 
   gitbak - bitbucket/github/gist backup
 
   GitBak mirrors Bitbucket/GitHub/Gist repositories; paths, users, and
-  authentication are specified in ~/.gitbak.
+  authentication are specified in `~/.gitbak`.
 
   When run, gitbak:
 
@@ -69,9 +71,9 @@ gist      repo #, options...
 user:   "username"    # mandatory
 token:  true          # use token instead of user/pass (default: false)
 auth:   false         # use authentication (default: true);
-                        use :github w/ gist to re-use github auth
+                      # use :github w/ gist to re-use github auth
 method: :https        # clone method (default: :ssh);
-                        NB: https auth not implemented yet
+                      # NB: https auth not implemented yet
 ```
 
 ## TODO
