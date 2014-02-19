@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
 
   s.description = <<-END.gsub(/^ {4}/, '')
     GitBak mirrors Bitbucket/GitHub/Gist repositories; paths, users,
-    and authentication are specified in ~/.gitbak.
+    and other options are specified in ~/.gitbak.
 
     When run, gitbak:
 

@@ -16,7 +16,7 @@
   gitbak - bitbucket/github/gist backup
 
   GitBak mirrors Bitbucket/GitHub/Gist repositories; paths, users, and
-  authentication are specified in `~/.gitbak`.
+  other options are specified in `~/.gitbak`.
 
   When run, gitbak:
 
