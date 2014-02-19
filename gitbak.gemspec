@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
 
     When run, gitbak:
 
-    * asks for unspecified passwords;
+    * asks for passwords;
     * lists repositories using APIs - authenticating if necessary;
     * clones/updates repositories;
     * shows a summary (if verbose)
@@ -23,13 +23,11 @@ Gem::Specification.new do |s|
   s.authors     = [ 'Felix C. Stegerman' ]
   s.email       = %w{ flx@obfusk.net }
 
-  s.license     = 'GPLv2'
+  s.license     = 'GPLv3+'
 
   s.executables = %w{ gitbak }
-  s.files       = %w{ .yardopts README.md bin/gitbak gitbak.gemspec }\
+  s.files       = %w{ .yardopts README.md gitbak.gemspec } \
                 + Dir['lib/**/*.rb']
-
-  s.add_runtime_dependency 'json'
 
   s.required_ruby_version = '>= 1.9.1'
 end

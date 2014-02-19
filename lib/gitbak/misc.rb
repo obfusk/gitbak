@@ -2,10 +2,10 @@
 #
 # File        : gitbak/misc.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2013-01-03
+# Date        : 2014-02-19
 #
-# Copyright   : Copyright (C) 2013  Felix C. Stegerman
-# Licence     : GPLv2
+# Copyright   : Copyright (C) 2014  Felix C. Stegerman
+# Licence     : GPLv3+
 #
 # --                                                            ; }}}1
 
@@ -27,36 +27,22 @@ module GitBak
 
     # --
 
-    # deep copy using Marshal
-    def self.deepdup (obj)
-      Marshal.load(Marshal.dump obj)
-    end
-
     # print msg to stderr and exit
     def self.die! (msg)
-      STDERR.puts msg
-      exit 1
+      STDERR.puts msg; exit 1
     end
 
     # does file/dir or symlink exists?
     def self.exists? (path)
-      File.exists?(path) or File.symlink?(path)
+      File.exists?(path) || File.symlink?(path)
     end
 
     # prompt for line; optionally hide input
-    def self.prompt (prompt, hide = false)                      # {{{1
-      STDOUT.print prompt
-      STDOUT.flush
-
-      if hide
-        line = STDIN.noecho { |i| i.gets }
-        STDOUT.puts
-      else
-        line = STDIN.gets
-      end
-
-      line and line.chomp
-    end                                                         # }}}1
+    def self.prompt (prompt, hide = false)
+      STDOUT.print prompt; STDOUT.flush
+      (line = hide ? STDIN.noecho { |i| i.gets } .tap { STDOUT.puts }
+                   : STDIN.gets) && line.chomp
+    end
 
     # execute command
     # @raise SysError on failure
@@ -69,10 +55,8 @@ module GitBak
     # @see sys_
     def self.sys (cmd, *args)                                   # {{{1
       opts = Hash === args.last ? args.pop : {}
-
       puts "$ #{ ([cmd] + args).join ' ' }" \
         if opts[:verbose] or opts[:noact]
-
       if opts[:noact]
         puts '(not actually doing anything)'
       else

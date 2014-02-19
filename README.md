@@ -1,16 +1,15 @@
-<!-- \{{{1 -->
+[]: {{{1
 
     File        : README
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2013-04-21
+    Date        : 2014-02-19
 
-    Copyright   : Copyright (C) 2013  Felix C. Stegerman
-    Version     : v0.4.3
+    Copyright   : Copyright (C) 2014  Felix C. Stegerman
+    Version     : v0.5.0
 
-<!-- }}}1 -->
+[]: }}}1
 
 ## Description
-<!-- \{{{1 -->
 
   gitbak - bitbucket/github/gist backup
 
@@ -19,70 +18,63 @@
 
   When run, gitbak:
 
-  * asks for unspecified passwords;
+  * asks for passwords;
   * lists repositories using APIs - authenticating if necessary;
   * clones/updates repositories;
   * shows a summary (if verbose)
 
-<!-- }}}1 -->
-
 ## Usage
-<!-- \{{{1 -->
 
-    $ gitbak --help                   # show options
-    $ vim ~/.gitbak                   # configure
-    $ gitbak -v                       # mirror
-    $ time gitbak -v 2>&1 | tee log   # w/ logfile
-
-  You may want to run gitbak as a cron job.                       TODO
-
-<!-- }}}1 -->
+```bash
+$ gitbak --help                                     # show options
+$ vim ~/.gitbak                                     # configure
+$ gitbak --no-act                                   # dry run
+$ gitbak -v                                         # mirror
+$ time gitbak -v 2>&1 | tee "$(date +%Y%m%d)".log   # w/ logfile
+```
 
 ## Installing
-<!-- \{{{1 -->
 
-    $ gem install gitbak              # rubygems
+```bash
+$ gem install gitbak                                # rubygems
+```
 
   Get it at https://github.com/obfusk/gitbak.  Depends: git, ruby.
 
-<!-- }}}1 -->
-
 ## Configuration
-<!-- \{{{1 -->
 
 ### Example
 
 ```ruby
 # ~/.gitbak
-
 dir = "#{ Dir.home }/__mirror__/#{ Time.new.strftime '%Y%m%d' }"
-
-GitBak.configure do |auth, services|
-  %w{ bob alice }.each do |u|
-    services.bitbucket  "#{dir}/#{u}/bitbucket", u, auth: true
-    services.github     "#{dir}/#{u}/github"   , u, auth: true
-    services.gist       "#{dir}/#{u}/gist"     , u, auth: true
-  end
+%w{ bob alice }.each do |u|
+  bitbucket  "#{dir}/#{u}/bitbucket", user: u
+  github     "#{dir}/#{u}/github"   , user: u, token: true
+  gist       "#{dir}/#{u}/gist"     , user: u, auth: :github
 end
 ```
 
 ### Methods
 
-    auth.<service>        user[, password]
-    services.<service>    dir, user[, options]
+```ruby
+bitbucket repo #, options...
+github    repo #, options...
+gist      repo #, options...
+```
 
-  The (default) services are: bitbucket, github, gist.  GitBak will
-  prompt for unspecified passwords.
+### Options
 
-#### Repository Options
-
-    :auth     can be true (same user) or 'username'.
-    :method   defaults to :ssh.
-
-<!-- }}}1 -->
+```ruby
+user:   "username"    # mandatory
+token:  true          # use token instead of user/pass (default: false)
+auth:   false         # use authentication (default: true);
+                        use :github w/ gist to re-use github auth
+method: :https        # clone method (default: :ssh);
+                        NB: https auth not implemented yet
+```
 
 ## TODO
-<!-- \{{{1 -->
 
   Some things that may be useful/implemented at some point.
 
@@ -90,7 +82,7 @@ end
   * tests?
   * better error handling?
 
-<!-- -->
+#
 
   * custom services (should be easy to add already)
   * metadata (issues, wikis, ...)
@@ -99,26 +91,18 @@ end
   * filtering
   * oauth?
 
-<!-- -->
+#
 
   * specify ssh key(s)?
   * https clone auth?
 
-<!-- }}}1 -->
-
 ## License
-<!-- \{{{1 -->
 
-  GPLv2 [1].
-
-<!-- }}}1 -->
+  GPLv3+ [1].
 
 ## References
-<!-- \{{{1 -->
 
-  [1] GNU General Public License, version 2
-  --- http://www.opensource.org/licenses/GPL-2.0
+  [1] GNU General Public License, version 3
+  --- http://www.gnu.org/licenses/gpl-3.0.html
 
-<!-- }}}1 -->
-
-<!-- vim: set tw=70 sw=2 sts=2 et fdm=marker : -->
+[]: ! ( vim: set tw=70 sw=2 sts=2 et fdm=marker : )
