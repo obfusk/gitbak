@@ -2,7 +2,7 @@
 #
 # File        : gitbak.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-02-19
+# Date        : 2014-07-08
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : GPLv3+
@@ -84,7 +84,7 @@ module GitBak
 
   # concatenate json
   def self.cat_json(pages)
-    pages.map { |x| JSON.load x } .flatten 1
+    pages.map { |x| JSON.parse x } .flatten 1
   end
 
   # --

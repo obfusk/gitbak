@@ -2,14 +2,14 @@
 
     File        : README
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2014-02-19
+    Date        : 2014-07-08
 
     Copyright   : Copyright (C) 2014  Felix C. Stegerman
-    Version     : v0.5.0
+    Version     : v0.5.1
 
 []: }}}1
 
-[![Gem Version](https://badge.fury.io/rb/gitbak.png)](http://badge.fury.io/rb/gitbak)
+[![Gem Version](https://badge.fury.io/rb/gitbak.png)](https://rubygems.org/gems/gitbak)
 
 ## Description
 
@@ -80,9 +80,16 @@ method: :https        # clone method (default: :ssh);
 
   Some things that may be useful/implemented at some point.
 
+  * gitlab w/ groups & server
+  * github organisations
+  * bitbucket teams
+
+#
+
   * ask password again on typo (^D) or auth fail
   * tests?
   * better error handling?
+  * use obfusk-util (for prompt etc.)?
 
 #
 

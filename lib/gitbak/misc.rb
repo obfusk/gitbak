@@ -2,7 +2,7 @@
 #
 # File        : gitbak/misc.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-02-19
+# Date        : 2014-07-08
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : GPLv3+
@@ -34,7 +34,7 @@ module GitBak
 
     # does file/dir or symlink exists?
     def self.exists? (path)
-      File.exists?(path) || File.symlink?(path)
+      File.exist?(path) || File.symlink?(path)
     end
 
     # prompt for line; optionally hide input

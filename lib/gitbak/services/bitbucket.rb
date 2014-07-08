@@ -2,7 +2,7 @@
 #
 # File        : gitbak/services/bitbucket.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-02-19
+# Date        : 2014-07-08
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : GPLv3+
@@ -20,7 +20,7 @@ module GitBak::Services
     HTTPS   = -> user, repo { "https://bitbucket.org/#{user}/#{repo}.git"  }
 
     def self.to_json(data)
-      JSON.load data
+      JSON.parse data
     end
 
     def self.next_page(data)
