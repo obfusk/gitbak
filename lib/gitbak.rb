@@ -2,7 +2,7 @@
 #
 # File        : gitbak.rb
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2014-07-08
+# Date        : 2014-10-29
 #
 # Copyright   : Copyright (C) 2014  Felix C. Stegerman
 # Licence     : GPLv3+
@@ -65,7 +65,11 @@ module GitBak
     o = auth ? { http_basic_authentication:
                    [auth[:user],auth[:pass]] } : {}
     begin
-      g[open url, o.merge(opts || {})]
+      open(url, o.merge(opts || {})) do |t|
+        m = t.meta; d = t.read
+        d.define_singleton_method(:meta) { m }    # monkey patch :-(
+        g[d]
+      end
     rescue OpenURI::HTTPError => e
       if e.io.status[0] == '401'
         raise AuthError, "401 for #{auth[:user]} #{info}"
