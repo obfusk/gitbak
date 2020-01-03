@@ -24,7 +24,7 @@ module GitBak::Services
     def self.next_page(data)
       (l = data.meta['link']) &&
       (n = l.split(',').grep(/rel="next"/).first) &&
-      (r = l.match(%r{<(https://[^>]*)>})) && r[1]
+      (r = n.match(%r{<(https://[^>]*)>})) && r[1]
     end
 
     def self.configure(cfg, dir, opts = {})                     # {{{1
